@@ -34,7 +34,6 @@ public:
   static void SetZTextureBias();
   static void SetViewportChanged();
   static void SetEfbScaleChanged(float scalex, float scaley);
-  static void SetTextureLODChanged(int texmapid, s32 min, s32 max, s32 bias);
   static void SetZSlope(float dfdx, float dfdy, float f0);
   static void SetIndMatrixChanged(int matrixidx);
   static void SetTevIndirectChanged();

@@ -231,15 +231,7 @@ static void SetSamplerState(u32 index, bool custom_tex)
   if (custom_tex)
     state.max_lod = 255;
 
-  //TODO only if option
-  if (g_ActiveConfig.UseAccurateMipmaps()) {
-    // Anisotropic filtering option.
-    state.anisotropic_filtering = 0;
-
-    //TODO only if changed?
-    PixelShaderManager::SetTextureLODChanged(index, state.min_lod, state.max_lod, state.lod_bias);
-  }
-  else if (g_ActiveConfig.iMaxAnisotropy != 0 && !SamplerCommon::IsBpTexMode0PointFiltering(tm0))
+  else if (g_ActiveConfig.iMaxAnisotropy != 0 && !SamplerCommon::IsBpTexMode0PointFiltering(tm0) && !g_ActiveConfig.UseAccurateMipmaps())
   {
     // https://www.opengl.org/registry/specs/EXT/texture_filter_anisotropic.txt
     // For predictable results on all hardware/drivers, only use one of:

@@ -19,7 +19,6 @@ struct PixelShaderConstants
   std::array<int4, 4> kcolors;
   int4 alpha;
   std::array<float4, 8> texdims;
-  std::array<float4, 8> tex_lod_controls; //used by the high-IR mipmaps. x = min, y = max, z = bias
   std::array<int4, 2> zbias;
   std::array<int4, 2> indtexscale;
   std::array<int4, 6> indtexmtx;

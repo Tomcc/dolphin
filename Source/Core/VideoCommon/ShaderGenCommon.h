@@ -303,7 +303,6 @@ inline const char* GetInterpolationQualifier(bool msaa, bool ssaa,
 #define I_FOGF "cfogf"
 #define I_ZSLOPE "czslope"
 #define I_EFBSCALE "cefbscale"
-#define I_TEXLODCONTROLS "tex_lod_controls"
 
 #define I_POSNORMALMATRIX "cpnmtx"
 #define I_PROJECTION "cproj"

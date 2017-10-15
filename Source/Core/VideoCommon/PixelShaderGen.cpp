@@ -376,7 +376,6 @@ void WritePixelShaderCommonHeader(ShaderCode& out, APIType ApiType, u32 num_texg
             "\tint4 " I_KCOLORS "[4];\n"
             "\tint4 " I_ALPHA ";\n"
             "\tfloat4 " I_TEXDIMS "[8];\n"
-            "\tfloat4 " I_TEXLODCONTROLS "[8];\n"
             "\tint4 " I_ZBIAS "[2];\n"
             "\tint4 " I_INDTEXSCALE "[2];\n"
             "\tint4 " I_INDTEXMTX "[6];\n"
@@ -443,13 +442,11 @@ void WritePixelShaderCommonHeader(ShaderCode& out, APIType ApiType, u32 num_texg
     out.Write(
       "int4 texture_read(int slot, float2 gc_uv, float stereo_layer) {           \n"
       "    float2 uv = gc_uv * " I_TEXDIMS "[slot].xy;                           \n"
-      "    float4 controls = " I_TEXLODCONTROLS "[slot];                         \n"
       "    float2 pixel_coord = uv / (128.0 * " I_TEXDIMS "[slot].xy);    \n"
       "    float2 dx_vtc = ddx(pixel_coord) / " I_EFBSCALE ".x;           \n"
       "    float2 dy_vtc = ddy(pixel_coord) / " I_EFBSCALE ".y;           \n"
       "    float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));  \n"
       "    float mipLevel = max(0.0, 0.5 * log2(delta_max_sqr));                   \n"
-      "    mipLevel = clamp(mipLevel + controls.z, controls.x, controls.y);      \n"
     );
 
     if (ApiType == APIType::OpenGL || ApiType == APIType::Vulkan)
