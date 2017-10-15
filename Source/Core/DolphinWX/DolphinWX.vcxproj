@@ -47,6 +47,18 @@
     <Manifest>
       <AdditionalManifestFiles>DolphinWX.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
+    <ClCompile>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Release|x64'">EditAndContinue</DebugInformationFormat>
+      <ProgramDataBaseFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BuildRootDir)$(Platform)\$(Configuration)\pdb.pdb</ProgramDataBaseFileName>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/FS %(AdditionalOptions)</AdditionalOptions>
+      <FunctionLevelLinking Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</FunctionLevelLinking>
+    </ClCompile>
+    <ClCompile>
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EditAndContinue</DebugInformationFormat>
+      <ProgramDataBaseFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(BuildRootDir)$(Platform)\$(Configuration)\pdb.pdb</ProgramDataBaseFileName>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/FS %(AdditionalOptions)</AdditionalOptions>
+      <MinimalRebuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</MinimalRebuild>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AboutDolphin.cpp" />

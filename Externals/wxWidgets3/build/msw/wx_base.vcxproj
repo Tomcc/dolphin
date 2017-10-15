@@ -1396,6 +1396,11 @@
       <PreprocessorDefinitions>__WXDEBUG__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="$(ExternalsDir)libpng\png\png.vcxproj">
       <Project>{4C9F135B-A85E-430C-BAD4-4C67EF5FC12C}</Project>
