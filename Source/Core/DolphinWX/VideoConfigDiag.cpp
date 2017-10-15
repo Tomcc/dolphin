@@ -564,8 +564,11 @@ VideoConfigDiag::VideoConfigDiag(wxWindow* parent, const std::string& title)
       const std::array<wxString, 5> af_choices{{_("1x"), _("2x"), _("4x"), _("8x"), _("16x")}};
       szr_enh->Add(new wxStaticText(page_enh, wxID_ANY, _("Anisotropic Filtering:")),
                    wxGBPosition(row, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-      szr_enh->Add(CreateChoice(page_enh, Config::GFX_ENHANCE_MAX_ANISOTROPY,
-                                wxGetTranslation(af_desc), af_choices.size(), af_choices.data()),
+
+      af_choice = CreateChoice(page_enh, Config::GFX_ENHANCE_MAX_ANISOTROPY,
+        wxGetTranslation(af_desc), af_choices.size(), af_choices.data());
+
+      szr_enh->Add(af_choice,
                    wxGBPosition(row, 1), span2, wxALIGN_CENTER_VERTICAL);
       row += 1;
     }
@@ -1118,6 +1121,9 @@ void VideoConfigDiag::OnUpdateUI(wxUpdateUIEvent& ev)
   // Anti-aliasing
   choice_aamode->Enable(vconfig.backend_info.AAModes.size() > 1);
   text_aamode->Enable(vconfig.backend_info.AAModes.size() > 1);
+
+  //Anisotropic - disable if accurate mipmaps are selected
+  af_choice->Enable(!ir_accurate_mipmaps_checkbox->IsChecked());
 
   // XFB
   virtual_xfb->Enable(vconfig.bUseXFB);

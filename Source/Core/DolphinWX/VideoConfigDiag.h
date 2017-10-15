@@ -153,6 +153,8 @@ protected:
   wxChoice* choice_aamode;
   DolphinSlider* conv_slider;
 
+  SettingChoice* af_choice;
+
   wxStaticText* label_display_resolution;
 
   wxButton* button_config_pp;
