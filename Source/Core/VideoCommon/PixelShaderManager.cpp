@@ -311,6 +311,15 @@ void PixelShaderManager::SetEfbScaleChanged(float scalex, float scaley)
   dirty = true;
 }
 
+void PixelShaderManager::SetTextureLODChanged(int texmapid, s32 min, s32 max, s32 bias)
+{
+  auto& controls = constants.tex_lod_controls[texmapid];
+  controls[0] = min / 16.f;
+  controls[1] = max / 16.f;
+  controls[2] = bias / 32.f;
+  dirty = true;
+}
+
 void PixelShaderManager::SetZSlope(float dfdx, float dfdy, float f0)
 {
   constants.zslope[0] = dfdx;

@@ -376,6 +376,7 @@ void WritePixelShaderCommonHeader(ShaderCode& out, APIType ApiType, u32 num_texg
             "\tint4 " I_KCOLORS "[4];\n"
             "\tint4 " I_ALPHA ";\n"
             "\tfloat4 " I_TEXDIMS "[8];\n"
+            "\tfloat4 " I_TEXLODCONTROLS "[8];\n"
             "\tint4 " I_ZBIAS "[2];\n"
             "\tint4 " I_INDTEXSCALE "[2];\n"
             "\tint4 " I_INDTEXMTX "[6];\n"
@@ -431,24 +432,35 @@ void WritePixelShaderCommonHeader(ShaderCode& out, APIType ApiType, u32 num_texg
     }
   }
 
-  // Mipmap function
-  if (ApiType == APIType::OpenGL || ApiType == APIType::Vulkan)
-  {
-    //TODO
-  }
-  else
-  {
+  //TODO if option selected
+  bool IR_MIPMAPS = true;
+
+  if (IR_MIPMAPS) {
+    // Mipmap function
+    if (ApiType == APIType::OpenGL || ApiType == APIType::Vulkan)
+    {
+      out.Write("#define ddx dFdx\n");
+      out.Write("#define ddy dFdy\n");
+    }
+
     out.Write(
-      "int4 texture_read(int slot, float2 gc_uv, float stereo_layer) {\n"
-      "    float2 uv = gc_uv * " I_TEXDIMS "[slot].xy;\n"
-      "    float2 texture_coordinate = uv / (128.0 * " I_TEXDIMS "[slot].xy);\n"
-      "    float2 dx_vtc = ddx(texture_coordinate) / cefbscale.x;\n"
-      "    float2 dy_vtc = ddy(texture_coordinate) / cefbscale.y;\n"
-      "    float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));\n"
-      "    float mipLevel = max(0, 0.5 * log2(delta_max_sqr));\n"
-      "    return iround(255.0 * Tex[slot].SampleLevel(samp[slot], float3(uv, stereo_layer), mipLevel));\n"
-      "}\n"
+      "int4 texture_read(int slot, float2 gc_uv, float stereo_layer) {           \n"
+      "    float2 uv = gc_uv * " I_TEXDIMS "[slot].xy;                           \n"
+      "    float4 controls = " I_TEXLODCONTROLS "[slot];                         \n"
+      "    float2 pixel_coord = uv / (128.0 * " I_TEXDIMS "[slot].xy);    \n"
+      "    float2 dx_vtc = ddx(pixel_coord) / " I_EFBSCALE ".x;           \n"
+      "    float2 dy_vtc = ddy(pixel_coord) / " I_EFBSCALE ".y;           \n"
+      "    float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));  \n"
+      "    float mipLevel = max(0.0, 0.5 * log2(delta_max_sqr));                   \n"
+      "    mipLevel = clamp(mipLevel + controls.z, controls.x, controls.y);      \n"
     );
+
+    if (ApiType == APIType::OpenGL || ApiType == APIType::Vulkan)
+      out.Write("    return iround(255.0 * textureLod(samp[slot], float3(uv, stereo_layer), mipLevel));\n");
+    else
+      out.Write("    return iround(255.0 * Tex[slot].SampleLevel(samp[slot], float3(uv, stereo_layer), mipLevel));\n");
+
+    out.Write("}\n\n");
   }
 
   out.Write("struct VS_OUTPUT {\n");
@@ -1193,14 +1205,18 @@ static void SampleTexture(ShaderCode& out, const char* texcoords, const char* te
 {
   out.SetConstantsUsed(C_TEXDIMS + texmap, C_TEXDIMS + texmap);
 
-  if (ApiType == APIType::D3D)
-  {
-    //out.Write("iround(255.0 * Tex[%d].Sample(samp[%d], float3(%s.xy * " I_TEXDIMS
-    //  "[%d].xy, %s))).%s;\n",
-    //  texmap, texmap, texcoords, texmap, stereo ? "layer" : "0.0", texswap);
+  //TODO option
+  bool IR_MIPMAPS = true;
+  if (IR_MIPMAPS) {
     out.Write(
       "texture_read(%d, %s, %s).%s;\n",
       texmap, texcoords, stereo ? "layer" : "0.0", texswap);
+  }
+  else if (ApiType == APIType::D3D)
+  {
+    out.Write("iround(255.0 * Tex[%d].Sample(samp[%d], float3(%s.xy * " I_TEXDIMS "[%d].xy, %s))).%s;\n",
+              texmap, texmap, texcoords, texmap, stereo ? "layer" : "0.0", texswap);
+    
   }
   else
   {
