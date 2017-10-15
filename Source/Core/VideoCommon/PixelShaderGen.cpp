@@ -431,6 +431,26 @@ void WritePixelShaderCommonHeader(ShaderCode& out, APIType ApiType, u32 num_texg
     }
   }
 
+  // Mipmap function
+  if (ApiType == APIType::OpenGL || ApiType == APIType::Vulkan)
+  {
+    //TODO
+  }
+  else
+  {
+    out.Write(
+      "int4 texture_read(int slot, float2 gc_uv, float stereo_layer) {\n"
+      "    float2 uv = gc_uv * " I_TEXDIMS "[slot].xy;\n"
+      "    float2 texture_coordinate = uv / (128.0 * " I_TEXDIMS "[slot].xy);\n"
+      "    float2 dx_vtc = ddx(texture_coordinate); // / cefbscale.x;\n"
+      "    float2 dy_vtc = ddy(texture_coordinate); // / cefbscale.y;\n"
+      "    float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));\n"
+      "    float mipLevel = max(0, 0.5 * log2(delta_max_sqr));\n"
+      "    return iround(255.0 * Tex[slot].SampleLevel(samp[slot], float3(uv, stereo_layer), mipLevel));\n"
+      "}\n"
+    );
+  }
+
   out.Write("struct VS_OUTPUT {\n");
   GenerateVSOutputMembers(out, ApiType, num_texgens, per_pixel_lighting, "");
   out.Write("};\n");
@@ -1175,9 +1195,12 @@ static void SampleTexture(ShaderCode& out, const char* texcoords, const char* te
 
   if (ApiType == APIType::D3D)
   {
-    out.Write("iround(255.0 * Tex[%d].Sample(samp[%d], float3(%s.xy * " I_TEXDIMS
-              "[%d].xy, %s))).%s;\n",
-              texmap, texmap, texcoords, texmap, stereo ? "layer" : "0.0", texswap);
+    //out.Write("iround(255.0 * Tex[%d].Sample(samp[%d], float3(%s.xy * " I_TEXDIMS
+    //  "[%d].xy, %s))).%s;\n",
+    //  texmap, texmap, texcoords, texmap, stereo ? "layer" : "0.0", texswap);
+    out.Write(
+      "texture_read(%d, %s, %s).%s;\n",
+      texmap, texcoords, stereo ? "layer" : "0.0", texswap);
   }
   else
   {
