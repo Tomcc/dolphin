@@ -234,6 +234,7 @@ void DolphinAnalytics::MakePerGameBuilder()
   builder.AddData("cfg-gfx-ubershader-mode", GetUbershaderMode(g_Config));
   builder.AddData("cfg-gfx-fast-depth", g_Config.bFastDepthCalc);
   builder.AddData("cfg-gfx-vertex-rounding", g_Config.UseVertexRounding());
+  builder.AddData("cfg-gfx-ir-accurate-mipmaps", g_Config.UseAccurateMipmaps());
 
   // GPU features.
   if (g_Config.iAdapter < static_cast<int>(g_Config.backend_info.Adapters.size()))

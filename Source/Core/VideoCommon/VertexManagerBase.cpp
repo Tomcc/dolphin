@@ -231,9 +231,8 @@ static void SetSamplerState(u32 index, bool custom_tex)
   if (custom_tex)
     state.max_lod = 255;
 
-  bool IR_MIPMAPS = true;
   //TODO only if option
-  if (IR_MIPMAPS) {
+  if (g_ActiveConfig.UseAccurateMipmaps()) {
     // Anisotropic filtering option.
     state.anisotropic_filtering = 0;
 

@@ -171,6 +171,7 @@ const ConfigInfo<bool> GFX_HACK_COPY_EFB_ENABLED{{System::GFX, "Hacks", "EFBScal
 const ConfigInfo<bool> GFX_HACK_EFB_EMULATE_FORMAT_CHANGES{
     {System::GFX, "Hacks", "EFBEmulateFormatChanges"}, false};
 const ConfigInfo<bool> GFX_HACK_VERTEX_ROUDING{{System::GFX, "Hacks", "VertexRounding"}, false};
+const ConfigInfo<bool> GFX_HACK_IR_ACCURATE_MIPMAPS{{System::GFX, "Hacks", "IRAccurateMipmaps"}, false};
 
 // Graphics.GameSpecific
 

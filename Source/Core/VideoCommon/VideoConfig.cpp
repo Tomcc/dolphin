@@ -140,6 +140,7 @@ void VideoConfig::Refresh()
   bCopyEFBScaled = Config::Get(Config::GFX_HACK_COPY_EFB_ENABLED);
   bEFBEmulateFormatChanges = Config::Get(Config::GFX_HACK_EFB_EMULATE_FORMAT_CHANGES);
   bVertexRounding = Config::Get(Config::GFX_HACK_VERTEX_ROUDING);
+  bAccurateMipmaps = Config::Get(Config::GFX_HACK_IR_ACCURATE_MIPMAPS);
 
   phack.m_enable = Config::Get(Config::GFX_PROJECTION_HACK) == 1;
   phack.m_sznear = Config::Get(Config::GFX_PROJECTION_HACK_SZNEAR) == 1;

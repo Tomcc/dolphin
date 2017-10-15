@@ -303,6 +303,12 @@ static wxString vertex_rounding_desc =
     wxTRANSLATE("Rounds 2D vertices to whole pixels. Fixes graphical problems in some games at "
                 "higher internal resolutions. This setting has no effect when native internal "
                 "resolution is used.\n\nIf unsure, leave this unchecked.");
+static wxString ir_accurate_mipmaps =
+    wxTRANSLATE("At higher IR, this ensures that mipmaps appear at the same distance as on a "
+                "console. Fixes water/lava/menus in Super Mario Galaxy 1 and 2.\n"
+                "In other games, it might make textures more blurry.\n"
+                "This setting has no effect when native internal resolution is used.\n\n"
+                "If unsure, leave this unchecked.");
 static wxString gpu_texture_decoding_desc =
     wxTRANSLATE("Enables texture decoding using the GPU instead of the CPU. This may result in "
                 "performance gains in some scenarios, or on systems where the CPU is the "
@@ -819,6 +825,11 @@ VideoConfigDiag::VideoConfigDiag(wxWindow* parent, const std::string& title)
                          Config::GFX_HACK_VERTEX_ROUDING);
       szr_other->Add(vertex_rounding_checkbox);
 
+      ir_accurate_mipmaps_checkbox =
+        CreateCheckBox(page_hacks, _("Res-invariant Mipmaps"), wxGetTranslation(ir_accurate_mipmaps),
+          Config::GFX_HACK_IR_ACCURATE_MIPMAPS);
+      szr_other->Add(ir_accurate_mipmaps_checkbox);
+
       wxStaticBoxSizer* const group_other =
           new wxStaticBoxSizer(wxVERTICAL, page_hacks, _("Other"));
       group_other->Add(szr_other, 1, wxEXPAND | wxLEFT | wxRIGHT, space5);
@@ -1117,6 +1128,9 @@ void VideoConfigDiag::OnUpdateUI(wxUpdateUIEvent& ev)
 
   // Vertex rounding
   vertex_rounding_checkbox->Enable(vconfig.iEFBScale != 1);
+
+  // Accurate IR
+  ir_accurate_mipmaps_checkbox->Enable(vconfig.iEFBScale != 1);
 
   // Repopulating the post-processing shaders can't be done from an event
   if (choice_ppshader && choice_ppshader->IsEmpty())

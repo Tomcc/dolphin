@@ -164,6 +164,7 @@ union ShaderHostConfig
     u32 wireframe : 1;
     u32 per_pixel_lighting : 1;
     u32 vertex_rounding : 1;
+    u32 accurate_mipmaps : 1;
     u32 fast_depth_calc : 1;
     u32 bounding_box : 1;
     u32 backend_dual_source_blend : 1;

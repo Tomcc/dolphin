@@ -167,6 +167,7 @@ protected:
 
   wxCheckBox* progressive_scan_checkbox;
   wxCheckBox* vertex_rounding_checkbox;
+  wxCheckBox* ir_accurate_mipmaps_checkbox;
 
   wxChoice* choice_ppshader;
 

@@ -125,6 +125,7 @@ struct VideoConfig final
   bool bEnablePixelLighting;
   bool bFastDepthCalc;
   bool bVertexRounding;
+  bool bAccurateMipmaps;
   int iLog;           // CONF_ bits
   int iSaveTargetId;  // TODO: Should be dropped
 
@@ -245,6 +246,7 @@ struct VideoConfig final
     return backend_info.bSupportsGPUTextureDecoding && bEnableGPUTextureDecoding;
   }
   bool UseVertexRounding() const { return bVertexRounding && iEFBScale != 1; }
+  bool UseAccurateMipmaps() const { return bAccurateMipmaps && iEFBScale != 1; }
   u32 GetShaderCompilerThreads() const;
   u32 GetShaderPrecompilerThreads() const;
   bool CanPrecompileUberShaders() const;

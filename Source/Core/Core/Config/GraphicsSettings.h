@@ -109,6 +109,7 @@ extern const ConfigInfo<bool> GFX_HACK_SKIP_EFB_COPY_TO_RAM;
 extern const ConfigInfo<bool> GFX_HACK_COPY_EFB_ENABLED;
 extern const ConfigInfo<bool> GFX_HACK_EFB_EMULATE_FORMAT_CHANGES;
 extern const ConfigInfo<bool> GFX_HACK_VERTEX_ROUDING;
+extern const ConfigInfo<bool> GFX_HACK_IR_ACCURATE_MIPMAPS;
 
 // Graphics.GameSpecific
 

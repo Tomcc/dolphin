@@ -17,6 +17,7 @@ ShaderHostConfig ShaderHostConfig::GetCurrent()
   bits.wireframe = g_ActiveConfig.bWireFrame;
   bits.per_pixel_lighting = g_ActiveConfig.bEnablePixelLighting;
   bits.vertex_rounding = g_ActiveConfig.UseVertexRounding();
+  bits.accurate_mipmaps = g_ActiveConfig.UseAccurateMipmaps();
   bits.fast_depth_calc = g_ActiveConfig.bFastDepthCalc;
   bits.bounding_box = g_ActiveConfig.bBBoxEnable;
   bits.backend_dual_source_blend = g_ActiveConfig.backend_info.bSupportsDualSourceBlend;

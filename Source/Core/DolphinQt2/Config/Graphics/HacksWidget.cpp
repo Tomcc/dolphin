@@ -85,10 +85,12 @@ void HacksWidget::CreateWidgets()
   m_disable_bounding_box =
       new GraphicsBool(tr("Disable Bounding Box"), Config::GFX_HACK_BBOX_ENABLE, true);
   m_vertex_rounding = new GraphicsBool(tr("Vertex Rounding"), Config::GFX_HACK_VERTEX_ROUDING);
+  m_ir_accurate_mipmaps = new GraphicsBool(tr("IR Accurate Mipmaps"), Config::GFX_HACK_IR_ACCURATE_MIPMAPS);
 
   other_layout->addWidget(m_fast_depth_calculation, 0, 0);
   other_layout->addWidget(m_disable_bounding_box, 0, 1);
   other_layout->addWidget(m_vertex_rounding, 1, 0);
+  other_layout->addWidget(m_ir_accurate_mipmaps, 1, 0);
 
   main_layout->addWidget(efb_box);
   main_layout->addWidget(texture_cache_box);
@@ -211,6 +213,13 @@ void HacksWidget::AddDescriptions()
                  "higher internal resolutions. This setting has no effect when native internal "
                  "resolution is used.\n\nIf unsure, leave this unchecked.");
 
+  static const char* TR_IR_ACCURATE_MIPMAPS_DESCRIPTION =
+      QT_TR_NOOP("At higher IR, this ensures that mipmaps appear at the same distance as a real "
+                "console. Fixes water/lava/menu screens in Super Mario Galaxy 1 and 2.\n"
+                "In other games, it might make textures more blurry.\n"
+                "This setting has no effect when native internal resolution is used.\n\n"
+                "If unsure, leave this unchecked.");
+
   AddDescription(m_skip_efb_cpu, TR_SKIP_EFB_CPU_ACCESS_DESCRIPTION);
   AddDescription(m_ignore_format_changes, TR_IGNORE_FORMAT_CHANGE_DESCRIPTION);
   AddDescription(m_store_efb_copies, TR_STORE_EFB_TO_TEXTURE_DESCRIPTION);
@@ -224,4 +233,5 @@ void HacksWidget::AddDescriptions()
   AddDescription(m_fast_depth_calculation, TR_FAST_DEPTH_CALC_DESCRIPTION);
   AddDescription(m_disable_bounding_box, TR_DISABLE_BOUNDINGBOX_DESCRIPTION);
   AddDescription(m_vertex_rounding, TR_VERTEX_ROUNDING_DESCRIPTION);
+  AddDescription(m_ir_accurate_mipmaps, TR_IR_ACCURATE_MIPMAPS_DESCRIPTION);
 }

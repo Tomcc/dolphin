@@ -432,10 +432,7 @@ void WritePixelShaderCommonHeader(ShaderCode& out, APIType ApiType, u32 num_texg
     }
   }
 
-  //TODO if option selected
-  bool IR_MIPMAPS = true;
-
-  if (IR_MIPMAPS) {
+  if (g_ActiveConfig.UseAccurateMipmaps()) {
     // Mipmap function
     if (ApiType == APIType::OpenGL || ApiType == APIType::Vulkan)
     {
@@ -1205,9 +1202,7 @@ static void SampleTexture(ShaderCode& out, const char* texcoords, const char* te
 {
   out.SetConstantsUsed(C_TEXDIMS + texmap, C_TEXDIMS + texmap);
 
-  //TODO option
-  bool IR_MIPMAPS = true;
-  if (IR_MIPMAPS) {
+  if (g_ActiveConfig.UseAccurateMipmaps()) {
     out.Write(
       "texture_read(%d, %s, %s).%s;\n",
       texmap, texcoords, stereo ? "layer" : "0.0", texswap);

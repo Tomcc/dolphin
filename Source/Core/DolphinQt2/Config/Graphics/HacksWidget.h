@@ -41,6 +41,7 @@ private:
   QCheckBox* m_fast_depth_calculation;
   QCheckBox* m_disable_bounding_box;
   QCheckBox* m_vertex_rounding;
+  QCheckBox* m_ir_accurate_mipmaps;
 
   void CreateWidgets();
   void ConnectWidgets();
