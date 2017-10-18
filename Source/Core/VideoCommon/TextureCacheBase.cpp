@@ -477,6 +477,50 @@ void TextureCacheBase::BindTextures()
   }
 }
 
+struct ManualMipmapDetector {
+
+  ManualMipmapDetector() {
+    min = { 255, 255, 255, 255 };
+    max = { 0, 0, 0, 0 };
+  }
+
+  void AddLevel(u32 width, u32 height, u32 row_length, const u8* buffer) {
+    ++levels;
+
+    u64 avg[4] = { 0 };
+    for (u32 i = 0; i < height; ++i) {
+      auto* row = buffer;
+      for (u32 j = 0; j < width; ++j) {
+        avg[0] += row[0];
+        avg[1] += row[1];
+        avg[2] += row[2];
+        avg[3] += row[3];
+
+        row += 4;
+      }
+      
+      buffer += row_length;
+    }
+
+    for (u32 c = 0; c < 4; ++c) {
+      u8 cur = avg[c] / (width * height);
+      max[c] = std::max(cur, max[c]);
+      min[c] = std::min(cur, min[c]);
+    }
+  }
+
+  bool HasManualMipmaps() const {
+    const u8 THRESHOLD = 50;
+    return
+      levels > 1 &&
+      max[0] - min[0] + max[1] - min[1] + max[2] - min[2] + max[3] - min[3] > THRESHOLD;
+  }
+
+protected:
+  u32 levels = 0;
+  std::array<u8, 4> min, max;
+};
+
 TextureCacheBase::TCacheEntry* TextureCacheBase::Load(const u32 stage)
 {
   // if this stage was not invalidated by changes to texture registers, keep the current texture
@@ -774,6 +818,8 @@ TextureCacheBase::TCacheEntry* TextureCacheBase::Load(const u32 stage)
   config.levels = texLevels;
   config.format = hires_tex ? hires_tex->GetFormat() : AbstractTextureFormat::RGBA8;
 
+  ManualMipmapDetector manual_mip_detector;
+
   TCacheEntry* entry = AllocateCacheEntry(config);
   GFX_DEBUGGER_PAUSE_AT(NEXT_NEW_TEXTURE, true);
 
@@ -810,6 +856,10 @@ TextureCacheBase::TCacheEntry* TextureCacheBase::Load(const u32 stage)
     }
 
     entry->texture->Load(0, width, height, expandedWidth, temp, decoded_texture_size);
+
+    if (tex_levels > 1) {
+      manual_mip_detector.AddLevel(width, height, expandedWidth, temp);
+    }
   }
 
   iter = textures_by_address.emplace(address, entry);
@@ -886,12 +936,16 @@ TextureCacheBase::TCacheEntry* TextureCacheBase::Load(const u32 stage)
                              decoded_mip_size);
       }
 
+      manual_mip_detector.AddLevel(mip_width, mip_height, expanded_mip_width, temp);
+
       mip_src_data += mip_size;
 
       if (g_ActiveConfig.bDumpTextures)
         DumpTexture(entry, basename, level);
     }
   }
+
+  entry->has_manual_mips = manual_mip_detector.HasManualMipmaps();
 
   INCSTAT(stats.numTexturesUploaded);
   SETSTAT(stats.numTexturesAlive, textures_by_address.size());

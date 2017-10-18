@@ -93,6 +93,8 @@ union SamplerState
 
   SamplerState& operator=(const SamplerState& rhs);
 
+  using StorageType = u64;
+
   bool operator==(const SamplerState& rhs) const { return hex == rhs.hex; }
   bool operator!=(const SamplerState& rhs) const { return hex != rhs.hex; }
   bool operator<(const SamplerState& rhs) const { return hex < rhs.hex; }
@@ -105,8 +107,9 @@ union SamplerState
   BitField<15, 8, u32> max_lod;   // multiplied by 16
   BitField<23, 8, s32> lod_bias;  // multiplied by 32
   BitField<31, 1, u32> anisotropic_filtering;
+  BitField<32, 8, u32, StorageType> lod_bias_scale;
 
-  u32 hex;
+  StorageType hex;
 };
 
 namespace RenderState

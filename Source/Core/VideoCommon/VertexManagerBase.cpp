@@ -209,7 +209,7 @@ std::pair<size_t, size_t> VertexManagerBase::ResetFlushAspectRatioCount()
   return val;
 }
 
-static void SetSamplerState(u32 index, bool custom_tex)
+static void SetSamplerState(u32 index, bool custom_tex, bool has_manual_mips)
 {
   const FourTexUnits& tex = bpmem.tex[index / 4];
   const TexMode0& tm0 = tex.texMode0[index % 4];
@@ -228,8 +228,13 @@ static void SetSamplerState(u32 index, bool custom_tex)
   }
 
   // Custom textures may have a greater number of mips
-  if (custom_tex)
+  if (custom_tex) {
     state.max_lod = 255;
+  }
+  else if(has_manual_mips && SamplerCommon::AreBpTexMode0MipmapsEnabled(tm0)) {
+    //note: this is enabled even at 1x IR because we also want to disable Anisotropic for those textures
+    state.lod_bias_scale = g_ActiveConfig.iEFBScale;
+  }
 
   // Anisotropic filtering option.
   if (g_ActiveConfig.iMaxAnisotropy != 0 && !SamplerCommon::IsBpTexMode0PointFiltering(tm0))
@@ -323,7 +328,7 @@ void VertexManagerBase::Flush()
 
       if (tentry)
       {
-        SetSamplerState(i, tentry->is_custom_tex);
+        SetSamplerState(i, tentry->is_custom_tex, tentry->has_manual_mips);
         PixelShaderManager::SetTexDims(i, tentry->native_width, tentry->native_height);
       }
       else

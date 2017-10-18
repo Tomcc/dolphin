@@ -82,6 +82,7 @@ public:
     bool is_custom_tex;
     bool may_have_overlapping_textures = true;
     bool tmem_only = false;  // indicates that this texture only exists in the tmem cache
+    bool has_manual_mips = false; // indicates that the mips in this texture are arbitrary content, aren't just downscaled
 
     unsigned int native_width,
         native_height;  // Texture dimensions from the GameCube's point of view

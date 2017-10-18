@@ -301,7 +301,14 @@ ID3D11SamplerState* StateCache::Get(SamplerState state)
   sampdc.MinLOD = state.min_lod / 16.f;
   sampdc.MipLODBias = (s32)state.lod_bias / 32.0f;
 
-  if (state.anisotropic_filtering)
+  //if texture is marked as hacky
+  if(state.lod_bias_scale)
+  {
+    auto offset = log2f(state.lod_bias_scale);
+    sampdc.MaxLOD += offset;
+    sampdc.MipLODBias += offset;
+  }
+  else if (state.anisotropic_filtering)
   {
     sampdc.Filter = D3D11_FILTER_ANISOTROPIC;
     sampdc.MaxAnisotropy = 1u << g_ActiveConfig.iMaxAnisotropy;
