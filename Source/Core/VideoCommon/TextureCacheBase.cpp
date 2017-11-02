@@ -441,9 +441,13 @@ void TextureCacheBase::DumpTexture(TCacheEntry* entry, std::string basename, uns
   if (!File::IsDirectory(szDir))
     File::CreateDir(szDir);
 
+  if (is_arbitrary) {
+    basename += "_arb";
+  }
+     
   if (level > 0)
   {
-    basename += StringFromFormat(is_arbitrary ? "_arb_mip%i" : "_mip%i", level);
+    basename += StringFromFormat("_mip%i", level);
   }
 
   std::string filename = szDir + "/" + basename + ".png";
@@ -561,13 +565,13 @@ private:
                                                      Sample(x, y + 1), Sample(x + 1, y + 1)};
           auto* dst_pixel = dst + (j + i * dst_shape.row_length) * 4;
           dst_pixel[0] =
-              LinearToSRGB((samples[0][0] + samples[0][1] + samples[0][2] + samples[0][3]) * 0.25f);
+              LinearToSRGB((samples[0][0] + samples[1][0] + samples[2][0] + samples[3][0]) * 0.25f);
           dst_pixel[1] =
-              LinearToSRGB((samples[1][0] + samples[1][1] + samples[1][2] + samples[1][3]) * 0.25f);
+              LinearToSRGB((samples[0][1] + samples[1][1] + samples[2][1] + samples[3][1]) * 0.25f);
           dst_pixel[2] =
-              LinearToSRGB((samples[2][0] + samples[2][1] + samples[2][2] + samples[2][3]) * 0.25f);
+              LinearToSRGB((samples[0][2] + samples[1][2] + samples[2][2] + samples[3][2]) * 0.25f);
           dst_pixel[3] =
-              LinearToSRGB((samples[3][0] + samples[3][1] + samples[3][2] + samples[3][3]) * 0.25f);
+              LinearToSRGB((samples[0][3] + samples[1][3] + samples[2][3] + samples[3][3]) * 0.25f);
         }
       }
     }
@@ -583,10 +587,10 @@ private:
         const auto* row2 = ptr2;
         for (u32 j = 0; j < width; ++j, row1 += 4, row2 += 4)
         {
-          average_diff += std::abs(row1[0] - row2[0]);
-          average_diff += std::abs(row1[1] - row2[1]);
-          average_diff += std::abs(row1[2] - row2[2]);
-          average_diff += std::abs(row1[3] - row2[3]);
+          average_diff += std::abs(static_cast<float>(row1[0]) - static_cast<float>(row2[0]));
+          average_diff += std::abs(static_cast<float>(row1[1]) - static_cast<float>(row2[1]));
+          average_diff += std::abs(static_cast<float>(row1[2]) - static_cast<float>(row2[2]));
+          average_diff += std::abs(static_cast<float>(row1[3]) - static_cast<float>(row2[3]));
         }
         ptr1 += row_length;
         ptr2 += row_length;
