@@ -35,6 +35,7 @@
 #include "VideoCommon/TextureDecoder.h"
 #include "VideoCommon/VideoCommon.h"
 #include "VideoCommon/VideoConfig.h"
+#include "VideoCommon/ImageWrite.h"
 
 static const u64 TEXHASH_INVALID = 0;
 // Sonic the Fighters (inside Sonic Gems Collection) loops a 64 frames animation
@@ -497,32 +498,49 @@ public:
     levels.push_back({width, height, row_length, buffer});
   }
 
-  bool HasArbitraryMipmaps(u8* downsample_buffer) const
+  bool HasArbitraryMipmaps(const std::string& name, u8* downsample_buffer) const
   {
     if (levels.size() < 2)
       return false;
 
     // This is the average per-pixel, per-channel difference in percent between what we
     // expect a normal blurred mipmap to look like and what we actually received
-    constexpr auto THRESHOLD_PERCENT = 35.f;
 
+    constexpr auto THRESHOLD_PERCENT = 4.5f;
+
+    auto* src = downsample_buffer;
+    auto* dst = downsample_buffer + levels[1].byte_size();
+
+    float total_diff = 0.f;
+    
     for (std::size_t i = 0; i < levels.size() - 1; ++i)
     {
       const auto& level = levels[i];
       const auto& mip = levels[i + 1];
 
-      // Manually downsample the current layer with a simple box blur
+      // Manually downsample the past downsample with a simple box blur
       // This is not necessarily close to whatever the original artists used, however
       // It should still be closer than a thing that's not a downscale at all
-      level.Downsample(downsample_buffer, mip);
+      Level::Downsample(i ? src : level.buffer, level, dst, mip);
 
       // Find the average difference between pixels in this level but downsampled
       // and the next level
-      auto diff = mip.AverageDiff(downsample_buffer);
-      if (diff > THRESHOLD_PERCENT)
-        return true;
+      auto diff = mip.AverageDiff(dst);
+      total_diff += diff;
+
+      std::string szDir = File::GetUserPath(D_DUMPTEXTURES_IDX) + SConfig::GetInstance().GetGameID();
+
+      // make sure that the directory exists
+      if (!File::IsDirectory(szDir))
+        File::CreateDir(szDir);
+
+      TextureToPng(dst, mip.row_length * 4, StringFromFormat("%s/%s_arb_mip%d_down%d.png", szDir.c_str(), name.c_str(), i, (int)diff), mip.width, mip.height);
+      
+      std::swap(src, dst);
     }
-    return false;
+
+    auto all_levels = total_diff / (levels.size() - 1);
+    return all_levels > THRESHOLD_PERCENT;
   }
 
 private:
@@ -546,14 +564,17 @@ private:
     u32 row_length;
     const u8* buffer;
 
-    PixelRGBAf Sample(u32 x, u32 y) const
-    {
-      const auto* p = buffer + (x + y * row_length) * 4;
-      return {SRGBToLinear(p[0]), SRGBToLinear(p[1]), SRGBToLinear(p[2]), SRGBToLinear(p[3])};
+    u32 byte_size() const {
+      return row_length * height * 4;
+    }
+    
+    static PixelRGBAf Sample(const u8* src, const Level& src_shape, u32 x, u32 y) {
+      const auto* p = src + (x + y * src_shape.row_length) * 4;
+      return { SRGBToLinear(p[0]), SRGBToLinear(p[1]), SRGBToLinear(p[2]), SRGBToLinear(p[3]) };
     }
 
     // Puts a downsampled image in dst. dst must be at least width*height*4
-    void Downsample(u8* dst, const Level& dst_shape) const
+    static void Downsample(const u8* src, const Level& src_shape, u8* dst, const Level& dst_shape)
     {
       for (u32 i = 0; i < dst_shape.height; ++i)
       {
@@ -561,8 +582,12 @@ private:
         {
           auto x = j * 2;
           auto y = i * 2;
-          const std::array<PixelRGBAf, 4> samples = {Sample(x, y), Sample(x + 1, y),
-                                                     Sample(x, y + 1), Sample(x + 1, y + 1)};
+          const std::array<PixelRGBAf, 4> samples = {
+            Sample(src, src_shape, x, y),
+            Sample(src, src_shape, x + 1, y),
+            Sample(src, src_shape, x, y + 1),
+            Sample(src, src_shape, x + 1, y + 1)};
+
           auto* dst_pixel = dst + (j + i * dst_shape.row_length) * 4;
           dst_pixel[0] =
               LinearToSRGB((samples[0][0] + samples[1][0] + samples[2][0] + samples[3][0]) * 0.25f);
@@ -930,7 +955,7 @@ TextureCacheBase::TCacheEntry* TextureCacheBase::Load(const u32 stage)
 
     // Allocate memory for all levels at once
     size_t total_texture_size = decoded_texture_size;
-    size_t mip_downsample_buffer_size = decoded_texture_size / 4;
+    size_t mip_downsample_buffer_size = decoded_texture_size / 4 * 2;
     size_t prev_level_size = decoded_texture_size;
     for (u32 i = 1; i < tex_levels; ++i)
     {
@@ -1045,7 +1070,7 @@ TextureCacheBase::TCacheEntry* TextureCacheBase::Load(const u32 stage)
     }
   }
 
-  entry->has_arbitrary_mips = arbitrary_mip_detector.HasArbitraryMipmaps(dst_buffer);
+  entry->has_arbitrary_mips = arbitrary_mip_detector.HasArbitraryMipmaps(basename, dst_buffer);
 
   if (g_ActiveConfig.bDumpTextures)
   {
