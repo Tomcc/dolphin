@@ -529,17 +529,13 @@ public:
   }
 
 private:
-  static float SRGBToLinear(u8 srgb_byte)
+  static float RGBToLinear(u8 srgb_byte)
   {
-    auto srgb_float = static_cast<float>(srgb_byte) / 256.f;
-    // approximations found on
-    // http://chilliant.blogspot.com/2012/08/srgb-approximations-for-hlsl.html
-    return srgb_float * (srgb_float * (srgb_float * 0.305306011f + 0.682171111f) + 0.012522878f);
+    return static_cast<float>(srgb_byte) / 256.f;
   }
 
-  static u8 LinearToSRGB(float linear)
-  {
-    return static_cast<u8>(std::max(1.055f * std::pow(linear, 0.416666667f) - 0.055f, 0.f) * 256.f);
+  static u8 LinearToRGB(float linear) {
+    return static_cast<u8>(std::min(255.f, linear * 256.f));
   }
 
   struct Shape
@@ -557,7 +553,7 @@ private:
     static PixelRGBAf Sample(const u8* src, const Shape& src_shape, u32 x, u32 y)
     {
       const auto* p = src + (x + y * src_shape.row_length) * 4;
-      return {{SRGBToLinear(p[0]), SRGBToLinear(p[1]), SRGBToLinear(p[2]), SRGBToLinear(p[3])}};
+      return {{RGBToLinear(p[0]), RGBToLinear(p[1]), RGBToLinear(p[2]), RGBToLinear(p[3])}};
     }
 
     // Puts a downsampled image in dst. dst must be at least width*height*4
@@ -576,13 +572,13 @@ private:
 
           auto* dst_pixel = dst + (j + i * dst_shape.row_length) * 4;
           dst_pixel[0] =
-              LinearToSRGB((samples[0][0] + samples[1][0] + samples[2][0] + samples[3][0]) * 0.25f);
+              LinearToRGB((samples[0][0] + samples[1][0] + samples[2][0] + samples[3][0]) * 0.25f);
           dst_pixel[1] =
-              LinearToSRGB((samples[0][1] + samples[1][1] + samples[2][1] + samples[3][1]) * 0.25f);
+              LinearToRGB((samples[0][1] + samples[1][1] + samples[2][1] + samples[3][1]) * 0.25f);
           dst_pixel[2] =
-              LinearToSRGB((samples[0][2] + samples[1][2] + samples[2][2] + samples[3][2]) * 0.25f);
+              LinearToRGB((samples[0][2] + samples[1][2] + samples[2][2] + samples[3][2]) * 0.25f);
           dst_pixel[3] =
-              LinearToSRGB((samples[0][3] + samples[1][3] + samples[2][3] + samples[3][3]) * 0.25f);
+              LinearToRGB((samples[0][3] + samples[1][3] + samples[2][3] + samples[3][3]) * 0.25f);
         }
       }
     }
